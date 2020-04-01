@@ -47,7 +47,6 @@ class Sudoku(object):
                 
         
         setCells = []                           # stack of set cells
-        setOfSetCells = set()
         unsetCells = [set() for j in range(10)] # set cells into lists according to the domain size of the cell
         hasUnfilledCells = False
 
@@ -92,8 +91,10 @@ class Sudoku(object):
         # Main backtracking loop
         while currVal <= 9 or len(setCells) > 0:
             while not isSafe(currR, currC, currVal):
+                if currVal in possibleValues[currR][currC]:
+                    print("shouldnt be")
                 currVal += 1
-            
+
             if currVal <= 9:
                 self.ans[currR][currC] = currVal
                 visitedRows[currR].add(currVal)
@@ -101,13 +102,14 @@ class Sudoku(object):
                 blockR = currR // 3
                 blockC = currC // 3
                 visitedBlocks[blockR][blockC].add(currVal)
-                setOfSetCells.add((currR, currC))
 
                 # Forward checking
                 for i in range(9):
                     discardNumFromDomain(currR, i, currVal)
                     discardNumFromDomain(i, currC, currVal)
 
+                blockR *= 3
+                blockC *= 3
                 for i in range(3):
                     for j in range(3):
                         discardNumFromDomain(blockR + i, blockC + j, currVal)
@@ -125,7 +127,6 @@ class Sudoku(object):
             elif len(setCells) > 0: # Backtrack if no more available numbers 
                 self.ans[currR][currC] = 0 # reset to unfilled cell
                 currR, currC, currVal = setCells.pop()
-                setOfSetCells.discard((currR, currC))
                 visitedRows[currR].discard(currVal)
                 visitedCols[currC].discard(currVal)
                 blockR = currR // 3
@@ -137,6 +138,8 @@ class Sudoku(object):
                     addBackNumToDomain(currR, i, currVal)
                     addBackNumToDomain(i, currC, currVal)
                 
+                blockR *= 3
+                blockC *= 3
                 for i in range(3):
                     for j in range(3):
                         addBackNumToDomain(blockR + i, blockC + j, currVal)
