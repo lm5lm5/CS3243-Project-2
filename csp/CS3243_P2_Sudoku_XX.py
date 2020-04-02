@@ -1,5 +1,6 @@
 import sys
 import copy
+import time
 from heapq import heappop, heappush, heapify
 
 # Running script: given code can be run with the command:
@@ -25,7 +26,7 @@ class Sudoku(object):
                 if puzzle[i][j] == 0: # IsEmpty block
                     for k in range(1, 10):
                         possibleValues[i][j].add(k)
-        
+
         for i in range(9):
             for j in range(9):
                 num = puzzle[i][j]
@@ -44,8 +45,7 @@ class Sudoku(object):
                 for a in range(3):
                     for b in range(3):
                         possibleValues[x + a][y + b].discard(num)
-                
-        
+
         setCells = []                           # stack of set cells
         unsetCells = [set() for j in range(10)] # set cells into lists according to the domain size of the cell
         hasUnfilledCells = False
@@ -68,7 +68,7 @@ class Sudoku(object):
                 possibleValues[row][col].discard(num)
                 newLen = len(possibleValues[row][col])
                 unsetCells[newLen].add(cell)
-        
+
         def addBackNumToDomain(row, col, num):
             if isUnfilledCell(row, col) and isSafe(row, col, num):
                 cell = (row, col)
@@ -77,8 +77,8 @@ class Sudoku(object):
                 possibleValues[row][col].add(num)
                 newLen = len(possibleValues[row][col])
                 unsetCells[newLen].add(cell)
-        
-        
+
+
         def getNextUnsetCell():
             for i in range(len(unsetCells)):
                 if len(unsetCells[i]) > 0:
@@ -116,14 +116,14 @@ class Sudoku(object):
                 setCells.append((currR, currC, currVal))
 
                 nextUnsetCell = getNextUnsetCell()
-                
+
                 if nextUnsetCell == None:
                     return self.ans
 
                 currR, currC = nextUnsetCell
                 currVal = 1
 
-            elif len(setCells) > 0: # Backtrack if no more available numbers 
+            elif len(setCells) > 0: # Backtrack if no more available numbers
                 self.ans[currR][currC] = 0 # reset to unfilled cell
                 currR, currC, currVal = setCells.pop()
                 visitedRows[currR].discard(currVal)
@@ -136,7 +136,7 @@ class Sudoku(object):
                 for i in range(9):
                     addBackNumToDomain(currR, i, currVal)
                     addBackNumToDomain(i, currC, currVal)
-                
+
                 blockR *= 3
                 blockC *= 3
                 for i in range(3):
@@ -164,6 +164,8 @@ if __name__ == "__main__":
         print ("\nUsage: python CS3243_P2_Sudoku_XX.py input.txt output.txt\n")
         raise IOError("Input file not found!")
 
+    start_time = time.time()
+
     puzzle = [[0 for i in range(9)] for j in range(9)]
     lines = f.readlines()
 
@@ -179,6 +181,8 @@ if __name__ == "__main__":
 
     sudoku = Sudoku(puzzle)
     ans = sudoku.solve()
+
+    print("time elapsed in seconds: %s" % (time.time() - start_time))
 
     with open(sys.argv[2], 'a') as f:
         for i in range(9):

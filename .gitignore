@@ -1,3 +1,7 @@
 *.pyc
 *.pdf
 /.idea
+csp/1.out
+csp/2.out
+csp/3.out
+csp/4.out
