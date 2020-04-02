@@ -59,7 +59,7 @@ class Sudoku(object):
 
         if not hasUnfilledCells:
             return self.ans
-        
+
         def discardNumFromDomain(row, col, num):
             if isUnfilledCell(row, col):
                 cell = (row, col)
@@ -78,6 +78,7 @@ class Sudoku(object):
                 newLen = len(possibleValues[row][col])
                 unsetCells[newLen].add(cell)
         
+        
         def getNextUnsetCell():
             for i in range(len(unsetCells)):
                 if len(unsetCells[i]) > 0:
@@ -85,14 +86,12 @@ class Sudoku(object):
                     return cell
 
         currElement = getNextUnsetCell()
-        currR, currC = currElement 
+        currR, currC = currElement
         currVal = 1
 
         # Main backtracking loop
         while currVal <= 9 or len(setCells) > 0:
-            while not isSafe(currR, currC, currVal):
-                if currVal in possibleValues[currR][currC]:
-                    print("shouldnt be")
+            while currVal <= 9 and currVal not in possibleValues[currR][currC]:
                 currVal += 1
 
             if currVal <= 9:
