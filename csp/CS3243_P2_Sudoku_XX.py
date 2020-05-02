@@ -68,6 +68,8 @@ class Sudoku(object):
                 possibleValues[row][col].discard(num)
                 newLen = len(possibleValues[row][col])
                 unsetCells[newLen].add(cell)
+                return newLen > 0
+            return True
 
         def addBackNumToDomain(row, col, num):
             if isUnfilledCell(row, col) and isSafe(row, col, num):
@@ -102,16 +104,25 @@ class Sudoku(object):
                 blockC = currC // 3
                 visitedBlocks[blockR][blockC].add(currVal)
 
+                isPossibleValue = True
+
                 # Forward checking
                 for i in range(9):
-                    discardNumFromDomain(currR, i, currVal)
-                    discardNumFromDomain(i, currC, currVal)
+                    isPossibleValue = isPossibleValue and discardNumFromDomain(currR, i, currVal)
+                    isPossibleValue = isPossibleValue and discardNumFromDomain(i, currC, currVal)
+                    if not isPossibleValue:
+                        break
 
                 blockR *= 3
                 blockC *= 3
                 for i in range(3):
                     for j in range(3):
-                        discardNumFromDomain(blockR + i, blockC + j, currVal)
+                        isPossibleValue = isPossibleValue and discardNumFromDomain(blockR + i, blockC + j, currVal)
+                        if not isPossibleValue:
+                                break
+                    if not isPossibleValue:
+                            break
+                    
 
                 setCells.append((currR, currC, currVal))
 
@@ -121,7 +132,7 @@ class Sudoku(object):
                     return self.ans
 
                 currR, currC = nextUnsetCell
-                currVal = 1
+                currVal =  1 if isPossibleValue else 10
 
             elif len(setCells) > 0: # Backtrack if no more available numbers
                 self.ans[currR][currC] = 0 # reset to unfilled cell

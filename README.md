@@ -6,7 +6,7 @@ To test CSP via command line:
 cd csp
 
 2. Create Output
-python CS3243_P2_Sudoku_XX.py ../sudoku_test/input.txt output.txt
+python CS3243_P2_Sudoku_XX.py input.txt output.txt
 
 3. Test Solution validity
 python sudoku_test.py output.txt
