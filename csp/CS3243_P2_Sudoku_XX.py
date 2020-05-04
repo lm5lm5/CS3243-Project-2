@@ -1,5 +1,6 @@
 import sys
 import copy
+import time
 from heapq import heappop, heappush, heapify
 
 # Running script: given code can be run with the command:
@@ -17,6 +18,7 @@ class Sudoku(object):
         visitedBlocks = [[set() for i in range(3)] for j in range(3)]
         possibleValues = [[set() for i in range(9)] for j in range(9)]
         isSafe = lambda row, col, num: (num not in visitedRows[row]) and (num not in visitedCols[col])  and (num not in visitedBlocks[row // 3][col // 3])
+        isUnfilledCell = lambda row, col: self.ans[row][col] == 0
 
         # Initialize possible values of each cell
         for i in range(9):
@@ -24,7 +26,7 @@ class Sudoku(object):
                 if puzzle[i][j] == 0: # IsEmpty block
                     for k in range(1, 10):
                         possibleValues[i][j].add(k)
-        
+
         for i in range(9):
             for j in range(9):
                 num = puzzle[i][j]
@@ -43,40 +45,118 @@ class Sudoku(object):
                 for a in range(3):
                     for b in range(3):
                         possibleValues[x + a][y + b].discard(num)
-                
-        # set cells into arrays according to the number of unset cells they have
-        setCells = []
-        unsetCells = [[] for j in range(10)]
+
+        setCells = []                           # stack of set cells
+        unsetCells = [set() for j in range(10)] # set cells into lists according to the domain size of the cell
+        hasUnfilledCells = False
 
         for i in range(9):
             for j in range(9):
                 if puzzle[i][j] == 0:
                     size = len(possibleValues[i][j])
-                    unsetCells[size].append((i, j))
+                    unsetCells[size].add((i, j))
+                    hasUnfilledCells = True
 
-        pq = []
-        heapify(pq) 
-        for i in range(10):
-            if len(unsetCells[i]) > 0:
-                heappush(pq, i)
-        
-        size = pq[0]
-        if size == 0: # assumes puzzle is valid
+        if not hasUnfilledCells:
             return self.ans
-        
-        # main solving loop
-        currElement = unsetCells[size].pop()
-        currR, currC = currElement 
-        currVal = min(possibleValues[currR][currC])
-        print(size)
-        print(currElement)
-        print(puzzle[currR][currC])
-        while currVal <= 9 or len(setCells) > 0:
-            if currVal in possibleValues[currR][currC]:
-                print(currVal)
-            currVal += 1
 
-        return self.ans
+        def discardNumFromDomain(row, col, num):
+            if isUnfilledCell(row, col):
+                cell = (row, col)
+                prevLen = len(possibleValues[row][col])
+                unsetCells[prevLen].discard(cell)
+                possibleValues[row][col].discard(num)
+                newLen = len(possibleValues[row][col])
+                unsetCells[newLen].add(cell)
+                return newLen > 0
+            return True
+
+        def addBackNumToDomain(row, col, num):
+            if isUnfilledCell(row, col) and isSafe(row, col, num):
+                cell = (row, col)
+                prevLen = len(possibleValues[row][col])
+                unsetCells[prevLen].discard(cell)
+                possibleValues[row][col].add(num)
+                newLen = len(possibleValues[row][col])
+                unsetCells[newLen].add(cell)
+
+
+        def getNextUnsetCell():
+            for i in range(len(unsetCells)):
+                if len(unsetCells[i]) > 0:
+                    cell = unsetCells[i].pop()
+                    return cell
+
+        currElement = getNextUnsetCell()
+        currR, currC = currElement
+        currVal = 1
+
+        # Main backtracking loop
+        while currVal <= 9 or len(setCells) > 0:
+            while currVal <= 9 and currVal not in possibleValues[currR][currC]:
+                currVal += 1
+
+            if currVal <= 9:
+                self.ans[currR][currC] = currVal
+                visitedRows[currR].add(currVal)
+                visitedCols[currC].add(currVal)
+                blockR = currR // 3
+                blockC = currC // 3
+                visitedBlocks[blockR][blockC].add(currVal)
+
+                isPossibleValue = True
+
+                # Forward checking
+                for i in range(9):
+                    isPossibleValue = isPossibleValue and discardNumFromDomain(currR, i, currVal)
+                    isPossibleValue = isPossibleValue and discardNumFromDomain(i, currC, currVal)
+                    if not isPossibleValue:
+                        break
+
+                blockR *= 3
+                blockC *= 3
+                for i in range(3):
+                    for j in range(3):
+                        isPossibleValue = isPossibleValue and discardNumFromDomain(blockR + i, blockC + j, currVal)
+                        if not isPossibleValue:
+                                break
+                    if not isPossibleValue:
+                            break
+                    
+
+                setCells.append((currR, currC, currVal))
+
+                nextUnsetCell = getNextUnsetCell()
+
+                if nextUnsetCell == None:
+                    return self.ans
+
+                currR, currC = nextUnsetCell
+                currVal =  1 if isPossibleValue else 10
+
+            elif len(setCells) > 0: # Backtrack if no more available numbers
+                self.ans[currR][currC] = 0 # reset to unfilled cell
+                currR, currC, currVal = setCells.pop()
+                visitedRows[currR].discard(currVal)
+                visitedCols[currC].discard(currVal)
+                blockR = currR // 3
+                blockC = currC // 3
+                visitedBlocks[blockR][blockC].discard(currVal)
+
+                # Reverse the forward checking
+                for i in range(9):
+                    addBackNumToDomain(currR, i, currVal)
+                    addBackNumToDomain(i, currC, currVal)
+
+                blockR *= 3
+                blockC *= 3
+                for i in range(3):
+                    for j in range(3):
+                        addBackNumToDomain(blockR + i, blockC + j, currVal)
+
+                currVal += 1
+
+        return None
 
     # you may add more classes/functions if you think is useful
     # However, ensure all the classes/functions are in this file ONLY
@@ -95,6 +175,8 @@ if __name__ == "__main__":
         print ("\nUsage: python CS3243_P2_Sudoku_XX.py input.txt output.txt\n")
         raise IOError("Input file not found!")
 
+    start_time = time.time()
+
     puzzle = [[0 for i in range(9)] for j in range(9)]
     lines = f.readlines()
 
@@ -110,6 +192,8 @@ if __name__ == "__main__":
 
     sudoku = Sudoku(puzzle)
     ans = sudoku.solve()
+
+    print("time elapsed in seconds: %s" % (time.time() - start_time))
 
     with open(sys.argv[2], 'a') as f:
         for i in range(9):
