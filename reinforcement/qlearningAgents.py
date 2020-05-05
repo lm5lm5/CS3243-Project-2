@@ -53,14 +53,17 @@ class QLearningAgent(ReinforcementAgent):
           Should return 0.0 if we have never seen a state
           or the Q node value otherwise
         """
-        ####
+        ##
         if state in self.states:
+             ## have seen the state
             if action in self.states[state]:
+                ## have performed this action
                 return self.states[state][action]
             else:
                 self.states[state][action] = 0.0
                 return 0.0
         else:
+            ## new state
             self.states[state] = util.Counter()
             self.states[state][action] = 0.0
             return 0.0
@@ -77,6 +80,7 @@ class QLearningAgent(ReinforcementAgent):
         if len(actions) < 1:
             return 0.0
         else:
+            ## max value among all actions
             max = -float("inf")
             for action in actions:
               val = self.getQValue(state, action)
