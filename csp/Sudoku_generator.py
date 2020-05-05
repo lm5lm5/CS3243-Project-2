@@ -2,10 +2,6 @@
 import sys
 import random
 
-# initialise empty 9 by 9 grid
-grid = [[0 for i in range(9)] for j in range(9)]
-
-
 # A function to check if the grid is full
 def checkGrid(grid):
     for row in range(0, 9):
@@ -148,7 +144,7 @@ def createSudoku(attempts):
 
 
 # Find a valid Sudoku puzzle until no more cell can be removed
-def createSudokuNew():
+def createSudokuNew(grid):
     global counter
     filledCells = [i for i in range(81)]
     currentCellOptions = [i for i in range(81)]
@@ -182,7 +178,7 @@ def createSudokuNew():
             grid[row][col] = backup
             currentCellOptions.remove(index)
     print("number of filled cells: " + str(len(filledCells)))
-    return grid
+    return grid, len(filledCells)
 
 # # Find a valid Sudoku puzzle until no more cell can be removed
 # def createSudokuNewNew():
@@ -235,8 +231,13 @@ if __name__ == "__main__":
         print ("\nUsage: python Sudoku_generator.py output.txt\n")
         raise ValueError("Wrong number of arguments!")
 
-    fillGrid(grid)
-    finalGrid = createSudokuNew()
+    cells = 100
+
+    while cells > 22:
+        grid = [[0 for i in range(9)] for j in range(9)]
+        fillGrid(grid)
+        finalGrid, cells = createSudokuNew(grid)
+
     print("Sudoku Grid Ready")
     with open(sys.argv[1], 'a') as f:
         for i in range(9):
