@@ -54,8 +54,12 @@ class QLearningAgent(ReinforcementAgent):
           or the Q node value otherwise
         """
         ####
-        if state in self.states:  # TODO: runtime O(n), actually can directly return states[state][action] since default is 0
-            return self.states[state][action]
+        if state in self.states:
+            if action in self.states[state]:
+                return self.states[state][action]
+            else:
+                self.states[state][action] = 0.0
+                return 0.0
         else:
             self.states[state] = util.Counter()
             self.states[state][action] = 0.0
