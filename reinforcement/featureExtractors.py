@@ -108,7 +108,72 @@ class NewExtractor(FeatureExtractor):
     """
     def getFeatures(self, state, action):
         "*** YOUR CODE HERE ***"
-        pass
+        # 1. closestFood distance
+        # 2. closestGhost distance (with a search limit)
+        #     if hasEatenCapsule and timer > 2:
+        #         +ve
+        #     else:
+        #         -ve
+
+        # check closest food
+        food = state.getFood()
+        walls = state.getWalls()
+        features = util.Counter()
+
+        # compute the location of pacman after he takes the action
+        x, y = state.getPacmanPosition()
+        dx, dy = Actions.directionToVector(action)
+        next_x, next_y = int(x + dx), int(y + dy)
+
+        dist = closestFood((next_x, next_y), food, walls)
+        if dist is not None:
+            # make the distance a number less than one otherwise the update
+            # will diverge wildly
+            features["closest-food"] = float(dist) / (walls.width * walls.height)
+
+        ghostDist = getClosestGhostDistance((next_x, next_y), state, walls)
+
+        # print("0th timer = " + str(state.data.agentStates[0].scaredTimer))
+        # print("1st timer = " + str(state.data.agentStates[1].scaredTimer))
+        # if state.data.agentStates[1].scaredTimer > 0:
+        #     features["chase-ghost"] = 0.0 - ghostDist
+        # else:
+        #     features["escape-ghost"] = ghostDist
+        #     features["chase-ghost"] = walls.width + walls.height
+        features["closest-ghost"] = 0.0 - ghostDist
+
+        # print("ghostDist = " + str(ghostDist))
+
+        features.divideAll(10.0)
+        return features
+
+
+def getClosestGhostDistance(pos, state, walls):
+    """
+    closestGhostDistance -- this is similar to the function that we have
+    worked on in the search project; here its all in one place
+    """
+    fringe = [(pos[0], pos[1], 0)]
+    ghostPositions = state.getGhostPositions()
+
+    expanded = set()
+    while fringe:
+        pos_x, pos_y, dist = fringe.pop(0)
+        if dist > 5:
+            return 6.0
+        if (pos_x, pos_y) in expanded:
+            continue
+        expanded.add((pos_x, pos_y))
+        # if we find a ghost at this location then exit
+        if (pos_x, pos_y) in ghostPositions:
+            return dist
+        # otherwise spread out from the location to its neighbours
+        nbrs = Actions.getLegalNeighbors((pos_x, pos_y), walls)
+        for nbr_x, nbr_y in nbrs:
+            fringe.append((nbr_x, nbr_y, dist + 1))
+    # no food found
+    return walls.width + walls.height
+
 
 
         
