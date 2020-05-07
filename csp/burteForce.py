@@ -79,9 +79,7 @@ class Sudoku(object):
         visitedCols = [[False for j in range(10)] for i in range(9)]
         visitedBlocks = [[[False for k in range(10)] for i in range(3)] for j in range(3)]
         isSafe = lambda row, col, num: (not visitedRows[row][num]) and (not visitedCols[col][num])  and (not visitedBlocks[row // 3][col // 3][num])
-        possibleValues = [[set() for i in range(9)] for j in range(9)]
-        isUnfilledCell = lambda row, col: self.ans[row][col] == 0
-
+        
         for i in range(9):
             for j in range(9):
                 num = puzzle[i][j]
@@ -100,7 +98,6 @@ class Sudoku(object):
                 for k in range(1, 10):
                     if isSafe(i, j, k):
                         possibleValuesList[i][j].append(k)
-                        possibleValues[i][j].add(k)
 
         setCells = []                           # stack of set cells
         unsetCells = OrderedSet()
@@ -115,15 +112,7 @@ class Sudoku(object):
         if not hasUnfilledCells:
             return self.ans
 
-        def reduceDomain(row, col, num):
-            if isUnfilledCell(row, col):
-                possibleValues[row][col].discard(num)
-                return len(possibleValues[row][col]) > 0
-            return True
-
-        def increaseDomain(row, col, num):
-            if isUnfilledCell(row, col) and isSafe(row, col, num):
-                possibleValues[row][col].add(num)
+        
 
         def getNextUnsetCell():
             return unsetCells.pop()
@@ -139,7 +128,7 @@ class Sudoku(object):
             length = len(possibleValuesList[currR][currC])
             while index < length:
                 currVal = possibleValuesList[currR][currC][index]
-                if currVal in possibleValues[currR][currC]:
+                if isSafe(currR, currC, currVal):
                     break
                 else:
                     index += 1
@@ -153,18 +142,6 @@ class Sudoku(object):
                 blockC = currC // 3
                 visitedBlocks[blockR][blockC][currVal] = True
 
-                isPossibleValue = True
-
-                for i in range(9):
-                    isPossibleValue = isPossibleValue and reduceDomain(currR, i, currVal)
-                    isPossibleValue = isPossibleValue and reduceDomain(i, currC, currVal)
-
-                blockR *= 3
-                blockC *= 3
-                for i in range(3):
-                    for j in range(3):
-                        isPossibleValue = isPossibleValue and reduceDomain(blockR + i, blockC + j, currVal)
-
                 setCells.append(currR * 100 + currC * 10 + index)
 
                 nextUnsetCell = getNextUnsetCell()
@@ -175,7 +152,7 @@ class Sudoku(object):
 
                 currR = nextUnsetCell // nine
                 currC = nextUnsetCell % nine
-                index = 0 if isPossibleValue else 10
+                index = 0 
 
             elif len(setCells) > 0: # Backtrack if no more available numbers
                 unsetCells.add(currR * nine + currC)
@@ -192,17 +169,6 @@ class Sudoku(object):
                 blockR = currR // 3
                 blockC = currC // 3
                 visitedBlocks[blockR][blockC][currVal] = False
-
-                for i in range(9):
-                    increaseDomain(currR, i, currVal)
-                    increaseDomain(i, currC, currVal)
-
-                blockR *= 3
-                blockC *= 3
-                for i in range(3):
-                    for j in range(3):
-                        increaseDomain(blockR + i, blockC + j, currVal)
-
                 index += 1
 
         return None
