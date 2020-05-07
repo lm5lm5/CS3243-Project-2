@@ -51,7 +51,7 @@ class OrderedSet(collections.MutableSet):
 
     def pop(self, last=True):
         if not self:
-            raise KeyError('set is empty')
+            return None
         key = self.end[1][0] if last else self.end[2][0]
         self.discard(key)
         return key
@@ -78,86 +78,56 @@ class Sudoku(object):
         visitedRows = [[False for j in range(10)] for i in range(9)]
         visitedCols = [[False for j in range(10)] for i in range(9)]
         visitedBlocks = [[[False for k in range(10)] for i in range(3)] for j in range(3)]
-        possibleValues = [[[False for k in range(10)] for i in range(9)] for j in range(9)]
-        possibleValuesCounter = [[9 for j in range(9)] for i in range(9)]
         isSafe = lambda row, col, num: (not visitedRows[row][num]) and (not visitedCols[col][num])  and (not visitedBlocks[row // 3][col // 3][num])
+        possibleValues = [[set() for i in range(9)] for j in range(9)]
         isUnfilledCell = lambda row, col: self.ans[row][col] == 0
 
-        # Initialize possible values of each cell
-        for i in range(9):
-            for j in range(9):
-                if puzzle[i][j] == 0: # IsEmpty block
-                    for k in range(1, 10):
-                        possibleValues[i][j][k] = True
-        
         for i in range(9):
             for j in range(9):
                 num = puzzle[i][j]
                 if num != 0:
                     visitedRows[i][num] = True
                     visitedCols[j][num] = True
-                    for k in range(9):
-                        if possibleValues[i][k][num]:
-                            possibleValues[i][k][num] = False
-                            possibleValuesCounter[i][k] -= 1
-                        if possibleValues[k][j][num]:
-                            possibleValues[k][j][num] = False
-                            possibleValuesCounter[k][j] -= 1
 
                     x = i // 3
                     y = j // 3
                     visitedBlocks[x][y][num] = True
 
-                    x *= 3
-                    y *= 3
-                    for a in range(3):
-                        for b in range(3):
-                            s = x + a
-                            t = y + b
-                            if possibleValues[s][t][num]:
-                                possibleValues[s][t][num] = False
-                                possibleValuesCounter[s][t] -= 1
 
         possibleValuesList = [[list() for j in range(9)] for i in range(9)]
         for i in range(9):
             for j in range(9):
-                for k in range(9, 0, -1):
-                    if possibleValues[i][j][k]:
+                for k in range(1, 10):
+                    if isSafe(i, j, k):
                         possibleValuesList[i][j].append(k)
+                        possibleValues[i][j].add(k)
 
         setCells = []                           # stack of set cells
-        unsetCells = [OrderedSet() for j in range(10)] # set cells into lists according to the domain size of the cell
+        unsetCells = OrderedSet()
         hasUnfilledCells = False
 
         for i in range(9):
             for j in range(9):
                 if puzzle[i][j] == 0:
-                    size = possibleValuesCounter[i][j]
-                    unsetCells[size].add(i * nine + j)
+                    unsetCells.add(i * nine + j)
                     hasUnfilledCells = True
 
         if not hasUnfilledCells:
             return self.ans
 
-        def discardNumFromDomain(row, col, num): # Returns true if the discard did not lead an empty domain i.e. will fail later
-            cell = row * nine + col
-            unsetCells[possibleValuesCounter[row][col]].discard(cell)
-            possibleValues[row][col][num] = False
-            possibleValuesCounter[row][col] -= 1
-            newLen = possibleValuesCounter[row][col]
-            unsetCells[newLen].add(cell)
-            return newLen > 0
-            
+        def reduceDomain(row, col, num):
+            if isUnfilledCell(row, col):
+                possibleValues[row][col].discard(num)
+                return len(possibleValues[row][col]) > 0
+            return True
 
-        def addBackNumToDomain(row, col, num):
-            cell = row * nine + col
-            prevLen = possibleValuesCounter[row][col]
-            unsetCells[prevLen].discard(cell)
-            possibleValues[row][col][num] = True
-            possibleValuesCounter[row][col] += 1
-            newLen = possibleValuesCounter[row][col]
-            unsetCells[newLen].add(cell)
+        def increaseDomain(row, col, num):
+            if isUnfilledCell(row, col) and isSafe(row, col, num):
+                possibleValues[row][col].add(num)
 
+        def getNextUnsetCell():
+            return unsetCells.pop()
+        
         constraintCounter = [0 for j in range(10)] # LCV
         def sortDomain(row, col):
             domainToSort = possibleValuesList[row][col]
@@ -171,27 +141,22 @@ class Sudoku(object):
                     a = blockR + i
                     b = blockC + j
                     for num in domainToSort:
-                        if isUnfilledCell(a, b) and possibleValues[a][b][num]:
+                        if isUnfilledCell(a, b) and num in possibleValues[a][b]:
                             constraintCounter[num] += 1
             for i in range(blockR):
-                if isUnfilledCell(i, col) and possibleValues[i][col][num]:
+                if isUnfilledCell(i, col) and num in possibleValues[i][col]:
                     constraintCounter[num] += 1
             for i in range(blockR + 3, 9):
-                if isUnfilledCell(i, col) and possibleValues[i][col][num]:
+                if isUnfilledCell(i, col) and num in possibleValues[i][col]:
                     constraintCounter[num] += 1       
             for i in range(blockC):
-                if isUnfilledCell(row, i) and possibleValues[row][i][num]:
+                if isUnfilledCell(row, i) and num in possibleValues[row][i]:
                     constraintCounter[num] += 1  
             for i in range(blockC + 3, 9):
-                if isUnfilledCell(row, i) and possibleValues[row][i][num]:
+                if isUnfilledCell(row, i) and num in possibleValues[row][i]:
                     constraintCounter[num] += 1 
 
             domainToSort.sort(key=lambda x: constraintCounter[x])
-
-        def getNextUnsetCell():
-            for i in range(len(unsetCells)):
-                if len(unsetCells[i]) > 0:
-                    return unsetCells[i].pop()
 
         currElement = getNextUnsetCell()
         currR = currElement // nine
@@ -205,7 +170,7 @@ class Sudoku(object):
             length = len(possibleValuesList[currR][currC])
             while index < length:
                 currVal = possibleValuesList[currR][currC][index]
-                if possibleValues[currR][currC][currVal]:
+                if currVal in possibleValues[currR][currC]:
                     break
                 else:
                     index += 1
@@ -218,42 +183,18 @@ class Sudoku(object):
                 blockR = currR // 3
                 blockC = currC // 3
                 visitedBlocks[blockR][blockC][currVal] = True
-                blockR *= 3
-                blockC *= 3
 
                 isPossibleValue = True
 
-                # Forward checking
-                if isPossibleValue:
-                    for i in range(3):
-                        for j in range(3):
-                            a = blockR + i
-                            b = blockC + j
-                            if isUnfilledCell(a, b) and possibleValues[a][b][currVal] and not discardNumFromDomain(a, b, currVal):
-                                isPossibleValue = False
-                                break
-                if isPossibleValue:
-                    for i in range(blockR):
-                        if isUnfilledCell(i, currC) and possibleValues[i][currC][currVal] and not discardNumFromDomain(i, currC, currVal):
-                            isPossibleValue = False
-                            break
-                if isPossibleValue:
-                    for i in range(blockR + 3, 9):
-                        if isUnfilledCell(i, currC) and possibleValues[i][currC][currVal] and not discardNumFromDomain(i, currC, currVal):
-                            isPossibleValue = False
-                            break
-                if isPossibleValue:
-                    for i in range(blockC):
-                        if isUnfilledCell(currR, i) and possibleValues[currR][i][currVal] and not discardNumFromDomain(currR, i, currVal):
-                            isPossibleValue = False
-                            break
-                if isPossibleValue:
-                    for i in range(blockC + 3, 9):
-                        if isUnfilledCell(currR, i) and possibleValues[currR][i][currVal] and not discardNumFromDomain(currR, i, currVal):
-                            isPossibleValue = False
-                            break
-              
-                        
+                for i in range(9):
+                    isPossibleValue = isPossibleValue and reduceDomain(currR, i, currVal)
+                    isPossibleValue = isPossibleValue and reduceDomain(i, currC, currVal)
+
+                blockR *= 3
+                blockC *= 3
+                for i in range(3):
+                    for j in range(3):
+                        isPossibleValue = isPossibleValue and reduceDomain(blockR + i, blockC + j, currVal)
 
                 setCells.append(currR * 100 + currC * 10 + index)
 
@@ -265,38 +206,35 @@ class Sudoku(object):
 
                 currR = nextUnsetCell // nine
                 currC = nextUnsetCell % nine
-                sortDomain(currR, currC)
                 index = 0 if isPossibleValue else 10
+                if isPossibleValue:
+                    sortDomain(currR, currC)
 
             elif len(setCells) > 0: # Backtrack if no more available numbers
+                unsetCells.add(currR * nine + currC)
                 backtracks += 1
-                self.ans[currR][currC] = 0 # reset to unfilled cell
+                self.ans[currR][currC] = 0 
                 x = setCells.pop()
                 currR = (x // 100) % 10
                 currC = (x // 10) % 10
                 index = x % 10
                 currVal = possibleValuesList[currR][currC][index]
+                self.ans[currR][currC] = 0 
                 visitedRows[currR][currVal] = False
                 visitedCols[currC][currVal] = False
                 blockR = currR // 3
                 blockC = currC // 3
                 visitedBlocks[blockR][blockC][currVal] = False
 
-                # Reverse the forward checking
                 for i in range(9):
-                    if isUnfilledCell(currR, i) and not possibleValues[currR][i][currVal] and isSafe(currR, i, currVal):
-                        addBackNumToDomain(currR, i, currVal)
-                    if isUnfilledCell(i, currC) and not possibleValues[i][currC][currVal] and isSafe(i, currC, currVal):
-                        addBackNumToDomain(i, currC, currVal)
+                    increaseDomain(currR, i, currVal)
+                    increaseDomain(i, currC, currVal)
 
                 blockR *= 3
                 blockC *= 3
                 for i in range(3):
                     for j in range(3):
-                        a = blockR + i
-                        b = blockC + j
-                        if isUnfilledCell(a, b) and not possibleValues[a][b][currVal] and isSafe(a, b, currVal):
-                            addBackNumToDomain(a, b, currVal)
+                        increaseDomain(blockR + i, blockC + j, currVal)
 
                 index += 1
 
