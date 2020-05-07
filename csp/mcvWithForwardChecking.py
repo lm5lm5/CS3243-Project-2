@@ -244,6 +244,7 @@ class Sudoku(object):
                 currC = (x // 10) % 10
                 index = x % 10
                 currVal = possibleValuesList[currR][currC][index]
+                self.ans[currR][currC] = 0 
                 visitedRows[currR][currVal] = False
                 visitedCols[currC][currVal] = False
                 blockR = currR // 3
