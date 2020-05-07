@@ -102,13 +102,125 @@ class SimpleExtractor(FeatureExtractor):
         features.divideAll(10.0)
         return features
 
+
+
 class NewExtractor(FeatureExtractor):
     """
     Design you own feature extractor here. You may define other helper functions you find necessary.
     """
     def getFeatures(self, state, action):
         "*** YOUR CODE HERE ***"
-        pass
+        # check closest food
+        food = state.getFood()
+        walls = state.getWalls()
+        features = util.Counter()
+
+        # compute the location of pacman after he takes the action
+        x, y = state.getPacmanPosition()
+        dx, dy = Actions.directionToVector(action)
+        next_x, next_y = int(x + dx), int(y + dy)
+
+        dist = closestFood((next_x, next_y), food, walls)
+        if dist is not None:
+            # make the distance a number less than one otherwise the update
+            # will diverge wildly
+            features["closest-food"] = float(dist) / (walls.width * walls.height)
+
+        # numberOfActiveGhosts = 0
+        # # numberOfScaredGhosts = 0
+        # for index in range(1, len(state.data.agentStates)):
+        #     ghost_x, ghost_y = state.data.agentStates[index].getPosition()
+        #     if (ghost_x, ghost_y) in Actions.getLegalNeighbors((next_x, next_y), walls):
+        #         if state.data.agentStates[index].scaredTimer <= 0:
+        #             numberOfActiveGhosts += 1
+
+        features["number-of-active-ghosts-1-step-away"] = self.getNumberOfActiveGhosts((next_x, next_y), state, walls)
+        # features["number-of-scared-ghosts-1-step-away"] = numberOfScaredGhosts
+
+        capsuleDist = self.getClosestCapsuleDistance((next_x, next_y), state, walls)
+        if capsuleDist is not None:
+            features["closest-capsule-distance"] = float(capsuleDist)
+
+        # print("ghostDist = " + str(ghostDist))
+
+        features.divideAll(10.0)
+        return features
+
+    # def getNumberOfActiveGhosts(self, pos, state, walls):
+    #     numberOfActiveGhosts = 0
+    #     # numberOfScaredGhosts = 0
+    #     for index in range(1, len(state.data.agentStates)):
+    #         ghost_x, ghost_y = state.data.agentStates[index].getPosition()
+    #         if (ghost_x, ghost_y) in Actions.getLegalNeighbors(pos, walls):
+    #             if state.data.agentStates[index].scaredTimer <= 0:
+    #                 numberOfActiveGhosts += 1
+    #     return numberOfActiveGhosts
+
+    def getClosestCapsuleDistance(self, pos, state, walls):
+        fringe = [(pos[0], pos[1], 0)]
+        capsulesPostions = state.getCapsules()
+        if len(capsulesPostions) < 1:
+            return None
+
+        expanded = set()
+        while fringe:
+            pos_x, pos_y, dist = fringe.pop(0)
+            if (pos_x, pos_y) in expanded:
+                continue
+            expanded.add((pos_x, pos_y))
+            if (pos_x, pos_y) in capsulesPostions:
+                return dist
+            # otherwise spread out from the location to its neighbours
+            nbrs = Actions.getLegalNeighbors((pos_x, pos_y), walls)
+            for nbr_x, nbr_y in nbrs:
+                fringe.append((nbr_x, nbr_y, dist + 1))
+
+
+    def getClosestScaredGhostDistance(self, pos, state, walls):
+        """
+        closestGhostDistance -- this is similar to the function that we have
+        worked on in the search project; here its all in one place
+        """
+        fringe = [(pos[0], pos[1], 0)]
+        ghostPositions = []
+        for index in range(1, len(state.data.agentStates)):
+            if state.data.agentStates[index].scaredTimer > 0:
+                ghostPositions.append(state.data.agentStates[index].getPosition())
+        if len(ghostPositions) < 1:
+            return None
+
+        expanded = set()
+        while fringe:
+            pos_x, pos_y, dist = fringe.pop(0)
+            if (pos_x, pos_y) in expanded:
+                continue
+            expanded.add((pos_x, pos_y))
+            if (pos_x, pos_y) in ghostPositions:
+                return dist
+            # otherwise spread out from the location to its neighbours
+            nbrs = Actions.getLegalNeighbors((pos_x, pos_y), walls)
+            for nbr_x, nbr_y in nbrs:
+                fringe.append((nbr_x, nbr_y, dist + 1))
+        return None
+
+    # def getClosestCapsuleDistance(self, pos, state, walls):
+    #     fringe = [(pos[0], pos[1], 0)]
+    #     capsulesPostions = state.getCapsules()
+    #     if len(capsulesPostions) < 1:
+    #         return None
+    #
+    #     expanded = set()
+    #     while fringe:
+    #         pos_x, pos_y, dist = fringe.pop(0)
+    #         if (pos_x, pos_y) in expanded:
+    #             continue
+    #         expanded.add((pos_x, pos_y))
+    #         if (pos_x, pos_y) in capsulesPostions:
+    #             return dist
+    #         # otherwise spread out from the location to its neighbours
+    #         nbrs = Actions.getLegalNeighbors((pos_x, pos_y), walls)
+    #         for nbr_x, nbr_y in nbrs:
+    #             fringe.append((nbr_x, nbr_y, dist + 1))
 
 
         
