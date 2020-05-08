@@ -3,9 +3,10 @@ Training Done (turning off epsilon and alpha)
 ---------------------------------------------
 Scores:        1731.0, 1922.0, 1718.0, 1543.0, 1726.0, 1714.0, 1725.0, 1731.0, 1925.0, 1532.0
 Win Rate:      10/10 (1.00)
+Average Score: 1726.7
 Record:        Win, Win, Win, Win, Win, Win, Win, Win, Win, Win
 
 
 features["number-of-active-ghosts-1-step-away"]= self.getNumberOfActiveGhosts((next_x, next_y), state, walls)
-features["closest-scared-ghosts-distance"] = self.getNumberOfScaredGhosts((next_x, next_y), state, walls)
+features["inverted-closest-scared-ghosts-distance"] = self.getDistanceOfScaredGhosts((next_x, next_y), state, walls)
 features["closest-food"] = float(dist) / (walls.width * walls.height)

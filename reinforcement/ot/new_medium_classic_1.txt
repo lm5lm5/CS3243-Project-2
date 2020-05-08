@@ -1,0 +1,35 @@
+Beginning 50 episodes of Training
+Training Done (turning off epsilon and alpha)
+---------------------------------------------
+Pacman emerges victorious! Score: 1741
+Pacman emerges victorious! Score: 1524
+Pacman emerges victorious! Score: 1713
+Pacman emerges victorious! Score: 1921
+Pacman emerges victorious! Score: 1324
+Pacman emerges victorious! Score: 1721
+Pacman emerges victorious! Score: 1923
+Pacman emerges victorious! Score: 1532
+Pacman emerges victorious! Score: 1523
+Pacman emerges victorious! Score: 1526
+Pacman emerges victorious! Score: 1497
+Pacman emerges victorious! Score: 1732
+Pacman emerges victorious! Score: 1717
+Pacman died! Score: 244
+Pacman emerges victorious! Score: 1719
+Pacman emerges victorious! Score: 1922
+Pacman emerges victorious! Score: 1533
+Pacman emerges victorious! Score: 1523
+Pacman emerges victorious! Score: 1731
+Pacman died! Score: 214
+Average Score: 1514.0
+Scores:        1741.0, 1524.0, 1713.0, 1921.0, 1324.0, 1721.0, 1923.0, 1532.0, 1523.0, 1526.0, 1497.0, 1732.0, 1717.0, 244.0, 1719.0, 1922.0, 1533.0, 1523.0, 1731.0, 214.0
+Win Rate:      18/20 (0.90)
+Record:        Win, Win, Win, Win, Win, Win, Win, Win, Win, Win, Win, Win, Win, Loss, Win, Win, Win, Win, Win, Loss
+
+Features:
+features["closest-food"] = float(dist) / (walls.width * walls.height)
+features["number-of-active-ghosts-1-step-away"] = self.getNumberOfGhosts((next_x, next_y), state, walls)[0]
+features["inverted-closest-scared-ghosts-distance"] = self.getDistanceOfScaredGhosts((next_x, next_y), state, walls)
+
+#inverted distance
+#return 0 if no scared ghost found

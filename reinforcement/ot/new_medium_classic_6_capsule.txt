@@ -1,0 +1,29 @@
+Beginning 50 episodes of Training
+Training Done (turning off epsilon and alpha)
+---------------------------------------------
+Pacman emerges victorious! Score: 1700
+Pacman emerges victorious! Score: 1498
+Pacman emerges victorious! Score: 1732
+Pacman emerges victorious! Score: 1310
+Pacman emerges victorious! Score: 1682
+Pacman emerges victorious! Score: 1300
+Pacman emerges victorious! Score: 1318
+Pacman died! Score: 294
+Pacman emerges victorious! Score: 1647
+Pacman emerges victorious! Score: 1314
+Average Score: 1379.5
+Scores:        1700.0, 1498.0, 1732.0, 1310.0, 1682.0, 1300.0, 1318.0, 294.0, 1647.0, 1314.0
+Win Rate:      9/10 (0.90)
+Record:        Win, Win, Win, Win, Win, Win, Win, Loss, Win, Win
+
+Features:
+features["closest-food"] = float(dist) / (walls.width * walls.height)
+features["number-of-active-ghosts-1-step-away"] = self.getNumberOfGhosts((next_x, next_y), state, walls)[0]
+features["inverted-closest-scared-ghosts-distance"] = self.getDistanceOfScaredGhosts((next_x, next_y), state, walls)
+features["eats-food"] = 1.0
+features["number-of-capsule-1-step-away"] = sum((next_x, next_y) in Actions.getLegalNeighbors(c, walls) for c in capsules)
+
+getDistanceOfScaredGhosts:
+#inverted distance
+#return None if no scared ghost found
+# dist = 10/(dist * dist + 1)

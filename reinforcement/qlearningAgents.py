@@ -11,8 +11,6 @@
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
-import time
-
 from game import *
 from learningAgents import ReinforcementAgent
 from featureExtractors import *
@@ -224,8 +222,6 @@ class ApproximateQAgent(PacmanQAgent):
         features = self.featExtractor.getFeatures(state, action)
         for feature in features:
             self.weights[feature] += self.alpha * difference * features[feature]
-            # if (state.data.agentStates[1].scaredTimer == 0):
-            #     print("the weight is " + str(feature) + " " + str(self.weights[feature]))
         
 
     def final(self, state):

@@ -1,0 +1,39 @@
+Beginning 50 episodes of Training
+Training Done (turning off epsilon and alpha)
+---------------------------------------------
+Pacman died! Score: 124
+Pacman emerges victorious! Score: 1681
+Pacman emerges victorious! Score: 1724
+Pacman emerges victorious! Score: 1724
+Pacman died! Score: 315
+Pacman emerges victorious! Score: 1317
+Pacman emerges victorious! Score: 1533
+Pacman emerges victorious! Score: 1530
+Pacman died! Score: 215
+Pacman emerges victorious! Score: 1537
+Pacman emerges victorious! Score: 1525
+Pacman emerges victorious! Score: 1516
+Pacman emerges victorious! Score: 1527
+Pacman emerges victorious! Score: 1522
+Pacman emerges victorious! Score: 1337
+Pacman emerges victorious! Score: 1909
+Pacman emerges victorious! Score: 1338
+Pacman emerges victorious! Score: 1914
+Pacman emerges victorious! Score: 1524
+Pacman emerges victorious! Score: 1524
+Average Score: 1366.8
+Scores:        124.0, 1681.0, 1724.0, 1724.0, 315.0, 1317.0, 1533.0, 1530.0, 215.0, 1537.0, 1525.0, 1516.0, 1527.0, 1522.0, 1337.0, 1909.0, 1338.0, 1914.0, 1524.0, 1524.0
+Win Rate:      17/20 (0.85)
+Record:        Loss, Win, Win, Win, Loss, Win, Win, Win, Loss, Win, Win, Win, Win, Win, Win, Win, Win, Win, Win, Win
+
+Features:
+features["closest-food"] = float(dist) / (walls.width * walls.height)
+features["number-of-active-ghosts-1-step-away"] = self.getNumberOfGhosts((next_x, next_y), state, walls)[0]
+features["inverted-closest-scared-ghosts-distance"] = self.getDistanceOfScaredGhosts((next_x, next_y), state, walls)
+features["eats-food"] = 1.0
+features["number-of-capsule-1-step-away"] = sum((next_x, next_y) in Actions.getLegalNeighbors(c, walls) for c in capsules)
+
+getDistanceOfScaredGhosts:
+#inverted distance
+#return None if no scared ghost found
+# dist = 10/(dist * dist + 1)

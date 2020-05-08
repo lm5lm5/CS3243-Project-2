@@ -17,5 +17,5 @@ Win Rate:      9/10 (0.90)
 Record:        Win, Win, Win, Win, Loss, Win, Win, Win, Win, Win
 
 features["number-of-active-ghosts-1-step-away"]= self.getNumberOfActiveGhosts((next_x, next_y), state, walls)
-features["closest-scared-ghosts-distance"] = self.getNumberOfScaredGhosts((next_x, next_y), state, walls)
+features["closest-scared-ghosts-distance"] = self.getDistanceScaredGhosts((next_x, next_y), state, walls)
 features["closest-food"] = float(dist) / (walls.width * walls.height)
