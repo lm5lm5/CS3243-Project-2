@@ -1,0 +1,21 @@
+Beginning 50 episodes of Training
+Training Done (turning off epsilon and alpha)
+---------------------------------------------
+Pacman emerges victorious! Score: 2082
+Pacman died! Score: 1335
+Pacman emerges victorious! Score: 1876
+Pacman emerges victorious! Score: 2278
+Pacman died! Score: -6
+Pacman emerges victorious! Score: 2854
+Pacman died! Score: 393
+Pacman died! Score: 303
+Pacman emerges victorious! Score: 2854
+Pacman died! Score: 1106
+Average Score: 1507.5
+Scores:        2082.0, 1335.0, 1876.0, 2278.0, -6.0, 2854.0, 393.0, 303.0, 2854.0, 1106.0
+Win Rate:      5/10 (0.50)
+Record:        Win, Loss, Win, Win, Loss, Win, Loss, Loss, Win, Loss
+
+features["number-of-active-ghosts-1-step-away"]= self.getNumberOfActiveGhosts((next_x, next_y), state, walls)
+features["closest-scared-ghosts-distance"] = self.getNumberOfScaredGhosts((next_x, next_y), state, walls)
+features["closest-food"] = float(dist) / (walls.width * walls.height)
