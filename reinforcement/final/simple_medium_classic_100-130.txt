@@ -1,0 +1,36 @@
+Training Done (turning off epsilon and alpha)
+---------------------------------------------
+Pacman emerges victorious! Score: 1324
+Pacman emerges victorious! Score: 1307
+Pacman died! Score: 54
+Pacman emerges victorious! Score: 1314
+Pacman emerges victorious! Score: 1336
+Pacman emerges victorious! Score: 1328
+Pacman emerges victorious! Score: 1316
+Pacman died! Score: 110
+Pacman emerges victorious! Score: 1320
+Pacman emerges victorious! Score: 1305
+Pacman emerges victorious! Score: 1333
+Pacman emerges victorious! Score: 1521
+Pacman emerges victorious! Score: 1322
+Pacman died! Score: 211
+Pacman emerges victorious! Score: 1307
+Pacman emerges victorious! Score: 1324
+Pacman emerges victorious! Score: 1339
+Pacman emerges victorious! Score: 1331
+Pacman emerges victorious! Score: 1327
+Pacman emerges victorious! Score: 1309
+Pacman emerges victorious! Score: 1332
+Pacman emerges victorious! Score: 1331
+Pacman died! Score: 99
+Pacman emerges victorious! Score: 1326
+Pacman emerges victorious! Score: 1312
+Pacman emerges victorious! Score: 1322
+Pacman emerges victorious! Score: 1319
+Pacman died! Score: 165
+Pacman emerges victorious! Score: 1524
+Pacman emerges victorious! Score: 1326
+Average Score: 1136.46666667
+Scores:        1324.0, 1307.0, 54.0, 1314.0, 1336.0, 1328.0, 1316.0, 110.0, 1320.0, 1305.0, 1333.0, 1521.0, 1322.0, 211.0, 1307.0, 1324.0, 1339.0, 1331.0, 1327.0, 1309.0, 1332.0, 1331.0, 99.0, 1326.0, 1312.0, 1322.0, 1319.0, 165.0, 1524.0, 1326.0
+Win Rate:      25/30 (0.83)
+Record:        Win, Win, Loss, Win, Win, Win, Win, Loss, Win, Win, Win, Win, Win, Loss, Win, Win, Win, Win, Win, Win, Win, Win, Loss, Win, Win, Win, Win, Loss, Win, Win
