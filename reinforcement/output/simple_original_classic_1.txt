@@ -1,0 +1,17 @@
+Beginning 50 episodes of Training
+Training Done (turning off epsilon and alpha)
+---------------------------------------------
+Pacman died! Score: 720
+Pacman emerges victorious! Score: 2642
+Pacman emerges victorious! Score: 2434
+Pacman emerges victorious! Score: 2457
+Pacman died! Score: -71
+Pacman emerges victorious! Score: 2447
+Pacman emerges victorious! Score: 2641
+Pacman emerges victorious! Score: 2409
+Pacman emerges victorious! Score: 2479
+Pacman emerges victorious! Score: 2432
+Average Score: 2059.0
+Scores:        720.0, 2642.0, 2434.0, 2457.0, -71.0, 2447.0, 2641.0, 2409.0, 2479.0, 2432.0
+Win Rate:      8/10 (0.80)
+Record:        Loss, Win, Win, Win, Loss, Win, Win, Win, Win, Win

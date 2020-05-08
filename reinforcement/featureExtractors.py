@@ -126,35 +126,80 @@ class NewExtractor(FeatureExtractor):
             # will diverge wildly
             features["closest-food"] = float(dist) / (walls.width * walls.height)
 
-        # numberOfActiveGhosts = 0
-        # # numberOfScaredGhosts = 0
-        # for index in range(1, len(state.data.agentStates)):
-        #     ghost_x, ghost_y = state.data.agentStates[index].getPosition()
-        #     if (ghost_x, ghost_y) in Actions.getLegalNeighbors((next_x, next_y), walls):
-        #         if state.data.agentStates[index].scaredTimer <= 0:
-        #             numberOfActiveGhosts += 1
-
-        features["number-of-active-ghosts-1-step-away"] = self.getNumberOfActiveGhosts((next_x, next_y), state, walls)
-        # features["number-of-scared-ghosts-1-step-away"] = numberOfScaredGhosts
-
-        capsuleDist = self.getClosestCapsuleDistance((next_x, next_y), state, walls)
-        if capsuleDist is not None:
-            features["closest-capsule-distance"] = float(capsuleDist)
-
-        # print("ghostDist = " + str(ghostDist))
+        # features["bias"] = 1.0
+        features["number-of-active-ghosts-1-step-away"] = self.getNumberOfGhosts((next_x, next_y), state, walls)[0]
+        features["closest-scared-ghosts-distance"] = self.getDistanceOfScaredGhosts((next_x, next_y), state, walls)
+        # features["number-of-scared-ghosts-1-step-away"] = self.getNumberOfGhosts((next_x, next_y), state, walls)[1]
+        # features["number-of-scared-ghosts-2-step-away"] = self.getNumOfScaredGhostTwoStep((next_x, next_y), state, walls)
+        # features["getClosestScaredGhostDistance"] = self.getClosestScaredGhostDistance((next_x, next_y), state, walls)/10
+        # capsuleDist = self.getClosestCapsuleDistance((next_x, next_y), state, walls)
+        # if capsuleDist is not None:
+        #     features["closest-capsule-distance"] = float(capsuleDist)
 
         features.divideAll(10.0)
         return features
 
-    # def getNumberOfActiveGhosts(self, pos, state, walls):
-    #     numberOfActiveGhosts = 0
-    #     # numberOfScaredGhosts = 0
-    #     for index in range(1, len(state.data.agentStates)):
-    #         ghost_x, ghost_y = state.data.agentStates[index].getPosition()
-    #         if (ghost_x, ghost_y) in Actions.getLegalNeighbors(pos, walls):
-    #             if state.data.agentStates[index].scaredTimer <= 0:
-    #                 numberOfActiveGhosts += 1
-    #     return numberOfActiveGhosts
+    def getNumberOfGhosts(self, pos, state, walls):
+        numberOfActiveGhosts = 0
+        numberOfScaredGhosts = 0
+        for index in range(1, len(state.data.agentStates)):
+            ghost_x, ghost_y = state.data.agentStates[index].getPosition()
+            if (ghost_x, ghost_y) in Actions.getLegalNeighbors(pos, walls):
+                if state.data.agentStates[index].scaredTimer <= 0:
+                    numberOfActiveGhosts += 1
+                else:
+                    numberOfScaredGhosts += 1
+                    pass
+        return numberOfActiveGhosts, numberOfScaredGhosts
+
+    # this distance function is inverted
+    def getDistanceOfScaredGhosts(self, pos, state, walls):
+        fringe = [(pos[0], pos[1], 0)]
+        ghostPositions = []
+        for index in range(1, len(state.data.agentStates)):
+            if state.data.agentStates[index].scaredTimer > 0:
+                ghostPositions.append(state.data.agentStates[index].getPosition())
+        if len(ghostPositions) < 1:
+            return 0
+
+        expanded = set()
+        while fringe:
+            pos_x, pos_y, dist = fringe.pop(0)
+            if (pos_x, pos_y) in expanded:
+                continue
+            expanded.add((pos_x, pos_y))
+            if (pos_x, pos_y) in ghostPositions:
+                return 10/(dist * dist + 1)
+            # otherwise spread out from the location to its neighbours
+            nbrs = Actions.getLegalNeighbors((pos_x, pos_y), walls)
+            for nbr_x, nbr_y in nbrs:
+                fringe.append((nbr_x, nbr_y, dist + 1))
+        return 0
+
+    def getNumOfScaredGhostTwoStep(self, pos, state, walls):
+        fringe = [(pos[0], pos[1], 0)]
+        ghostPositions = []
+        for index in range(1, len(state.data.agentStates)):
+            if state.data.agentStates[index].scaredTimer > 0:
+                ghostPositions.append(state.data.agentStates[index].getPosition())
+        if len(ghostPositions) < 1:
+            return 0
+
+        expanded = set()
+        ghost = 0
+        while fringe:
+            pos_x, pos_y, dist = fringe.pop(0)
+            if (dist > 2):
+                return ghost
+            if (pos_x, pos_y) in expanded:
+                continue
+            expanded.add((pos_x, pos_y))
+            if (pos_x, pos_y) in ghostPositions:
+                ghost += 1
+            nbrs = Actions.getLegalNeighbors((pos_x, pos_y), walls)
+            for nbr_x, nbr_y in nbrs:
+                fringe.append((nbr_x, nbr_y, dist + 1))
+        return ghost
 
     def getClosestCapsuleDistance(self, pos, state, walls):
         fringe = [(pos[0], pos[1], 0)]
@@ -176,18 +221,15 @@ class NewExtractor(FeatureExtractor):
                 fringe.append((nbr_x, nbr_y, dist + 1))
 
 
+    # this distance function is not inverted
     def getClosestScaredGhostDistance(self, pos, state, walls):
-        """
-        closestGhostDistance -- this is similar to the function that we have
-        worked on in the search project; here its all in one place
-        """
         fringe = [(pos[0], pos[1], 0)]
         ghostPositions = []
         for index in range(1, len(state.data.agentStates)):
             if state.data.agentStates[index].scaredTimer > 0:
                 ghostPositions.append(state.data.agentStates[index].getPosition())
         if len(ghostPositions) < 1:
-            return None
+            return walls.width + walls.height
 
         expanded = set()
         while fringe:
@@ -201,7 +243,7 @@ class NewExtractor(FeatureExtractor):
             nbrs = Actions.getLegalNeighbors((pos_x, pos_y), walls)
             for nbr_x, nbr_y in nbrs:
                 fringe.append((nbr_x, nbr_y, dist + 1))
-        return None
+        return walls.width + walls.height
 
     # def getClosestCapsuleDistance(self, pos, state, walls):
     #     fringe = [(pos[0], pos[1], 0)]

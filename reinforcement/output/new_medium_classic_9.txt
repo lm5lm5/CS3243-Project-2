@@ -1,0 +1,11 @@
+Beginning 50 episodes of Training
+Training Done (turning off epsilon and alpha)
+---------------------------------------------
+Average Score: 1644.8
+Scores:        1527.0, 1538.0, 1529.0, 1530.0, 1518.0, 1521.0, 2131.0, 1912.0, 1913.0, 1329.0
+Win Rate:      10/10 (1.00)
+Record:        Win, Win, Win, Win, Win, Win, Win, Win, Win, Win
+
+features["number-of-scared-ghost-2-step-away"] = self.getNumOfGhostTwoStep((next_x, next_y), state, walls)
+features["number-of-active-ghosts-1-step-away"]= self.getNumberOfActiveGhosts((next_x, next_y), state, walls)
+features["closest-food"] = float(dist) / (walls.width * walls.height)
